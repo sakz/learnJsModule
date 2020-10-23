@@ -1,18 +1,16 @@
-[前端模块化：CommonJS,AMD,CMD,ES6](https://juejin.im/post/6844903576309858318#heading-2)
-
-
->模块化要解决的问题：
+#### 模块化要解决的问题：
 
 - 加载顺序
 - 污染全局
 
->实现方式：
+#### 实现方式：
 - es5实现，用立即执行函数 + 闭包
-- commonjs
+- commonjs `module.exports`
     - node, 用webpack打包
-    - `require.js` AMD规范
+- AMD `require.js` 
 - CMD `sea.js`
-- ES6模块化，import export
+- UMD `module.exports` || `AMD` || `window或global`
+- ES6模块化，`import` `export`
 
 
 #### ES5实现
@@ -26,7 +24,6 @@
 
 具体实现：
 - node, 用webpack打包
-- `require.js` AMD规范，依赖前置
 
 node的`require`并不是全局变量，本质上是下面这样
 
@@ -44,6 +41,8 @@ node的`require`并不是全局变量，本质上是下面这样
 ##### AMD
 >AMD 即Asynchronous Module Definition,中文名是“异步模块定义”的意思。它是一个在浏览器端模块化开发的规范,服务器端的规范是CommonJS。相当于客户端的commonjs。
 
+特点：
+- 依赖前置
 ```
 define(moduleName, [module], fatory); 定义模块
 
@@ -53,6 +52,7 @@ require([module],callback); 引入模块
 ##### CMD
 > CMD(Common Module Definition) 通用模块定义
 
+特点：
 - 依赖就近
 - 按需加载
 
@@ -61,6 +61,61 @@ define(funtion(require, exports, module) 定义模块
 
 seajs.use(['module路径'], function(moduleA, moduleB, moduleC){})
 ```
+
+##### UMD
+>UMD（Universal Module Definition - 通用模块定义）
+AMD是浏览器优先，异步加载；CommonJS是服务器优先，同步加载。
+1. 先判断是否支持Node.js模块格式（exports是否存在），存在则使用Node.js模块格式。
+2. 再判断是否支持AMD（define是否存在），存在则使用AMD方式加载模块。
+3. 前两个都不存在，则将模块公开到全局（window或global)
+
+参考vue.js和jquery.js的写法
+```js
+// vue.js 2.6.12
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global = global || self, global.Vue = factory());
+}(this, function () {
+
+  // 一堆vue的逻辑，最后返回Vue构造函数
+  
+  return Vue;
+}));
+```
+
+```js
+// jquery.js  1.10.0 (不同版本写法不太一样，大致也是做了上面3个判断)
+(function(window, undefined) {
+
+    // 一堆jQuery的定义，最后返回jQuery对象
+    
+    if (typeof module === "object" && typeof module.exports === "object") {
+        module.exports = jQuery;
+    } else {
+        window.jQuery = window.$ = jQuery;
+        if (typeof define === "function" && define.amd) {
+            define("jquery", [], function() {
+                return jQuery;
+            });
+        }
+    }
+
+})(window);
+```
+
+[前端模块化：CommonJS,AMD,CMD,ES6](https://juejin.im/post/6844903576309858318#heading-2)
+
+[代码demo地址](https://github.com/sakz/learnJsModule)
+
+[参考的webpack的配置](https://juejin.im/post/6844903802189905934#heading-8)
+
+[b站视频](https://www.bilibili.com/video/BV1K54y1S7zx)
+
+[umd-learning](https://github.com/cumt-robin/umd-learning)
+
+[UMD](https://leohxj.gitbooks.io/front-end-database/content/javascript-modules/about-umd.html)
+
 
 #### ES6 模块与 CommonJS 模块的差异
 
